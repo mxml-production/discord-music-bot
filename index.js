@@ -32,7 +32,7 @@ client.once('ready', () => {
         }
     });
 
-    function playRandomAudio() {
+    async function playRandomAudio() {
         const files = fs.readdirSync('./assets/music/').filter(file => file.endsWith('.mp3'));
 
         const availableFiles = files.filter(file => !playedFiles.includes(file));
@@ -48,6 +48,18 @@ client.once('ready', () => {
         const resource = createAudioResource(`./assets/music/${selectedFile}`, {
             inputType: StreamType.Arbitrary,
         });
+
+        const messages = await channel.messages.fetch({ limit: 10 });
+        channel.bulkDelete(messages);
+
+        const embed = {
+            color: 0x0099ff,
+            title: `🎶 En train de jouer :`,
+            description: `${selectedFile.slice(0, -4)}`,
+            timestamp: new Date(),
+        };
+
+        await channel.send({ embeds: [embed] });
 
         player.play(resource);
         connection.subscribe(player);
